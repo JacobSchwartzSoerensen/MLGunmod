@@ -32,6 +32,9 @@ public class Bullet extends Entity {
 		this.setSize(1f, 1f);
 		this.setPosition(x, y, z);
 		
+		this.rotationYaw = yaw;
+		this.rotationPitch = -pitch;
+		
 		this.yaw = yaw;
 		this.pitch = pitch;
 		this.speed = speed;
@@ -89,7 +92,7 @@ public class Bullet extends Entity {
 			
 			GL11.glPushMatrix();
 			GL11.glTranslatef((float) x, (float) y, (float) z);
-			GL11.glRotatef(bullet.prevRotationYaw + (bullet.rotationYaw - bullet.prevRotationYaw) * yaw - 90.0F, 0.0F, 1.0F, 0.0F);
+			GL11.glRotatef(-yaw + 180 , 0.0F, 1.0F, 0.0F);
 			GL11.glRotatef(bullet.rotationPitch + (bullet.rotationPitch - bullet.prevRotationPitch) * pitch, 1.0F, 0.0F, 0.0F);
 
 			this.bindTexture(bulletTexture);
