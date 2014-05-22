@@ -24,12 +24,11 @@ public class Gun extends Item {
 	@Override
 	public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player){
 		
-		if((System.currentTimeMillis()-lastShot) > shootDelay){
+		if((System.currentTimeMillis()-lastShot) > shootDelay && !world.isRemote){
 			
-			Bullet bullet = new Bullet(world, player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch, 5, 5);
+			Bullet bullet = new Bullet(world, player.posX, player.posY+player.eyeHeight, player.posZ, player.rotationYaw, player.rotationPitch, 5, 5);
 			
-			//if(world.isRemote)
-				world.spawnEntityInWorld(bullet);
+			world.spawnEntityInWorld(bullet);
 			
 			lastShot = System.currentTimeMillis();
 			

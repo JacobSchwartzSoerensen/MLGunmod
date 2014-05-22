@@ -7,7 +7,6 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
-import net.minecraft.client.renderer.entity.RenderLiving;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,6 +19,8 @@ public class Bullet extends Entity {
 	private float yaw = 0;
 	private float speed = 0;
 	private float damage = 0;
+	private int numTicks = 0;
+	private long maxAge = 1200;
 	
 	public Bullet(World world) {
 		super(world);
@@ -40,14 +41,17 @@ public class Bullet extends Entity {
 		this.speed = speed;
 		this.damage = damage;
 		
-		this.renderDistanceWeight = 10.0D;
+		this.renderDistanceWeight = 10.0D;;
 		
 	}
 	
 	@Override
 	public void onEntityUpdate(){
 		
-		double newX, newY, newZ;
+		if(maxAge < numTicks++)
+			this.setDead();
+		
+		super.onEntityUpdate();
 		
 		
 	}
@@ -55,19 +59,19 @@ public class Bullet extends Entity {
 	@Override
 	protected void entityInit() {
 		
-		EntityRegistry.registerModEntity(Bullet.class, "Bullet", 1, MLGunmod.instance, 128, 1, false);
+		
 		
 	}
 
 	@Override
 	protected void readEntityFromNBT(NBTTagCompound nbttagcompound) {
-		super.readFromNBT(nbttagcompound);
+		//No need to save bullet data
 		
 	}
 
 	@Override
 	protected void writeEntityToNBT(NBTTagCompound nbttagcompound) {
-		super.writeToNBT(nbttagcompound);
+		//No need to read bullet data
 		
 	}
 

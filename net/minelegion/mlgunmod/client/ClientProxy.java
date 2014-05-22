@@ -14,7 +14,6 @@ public class ClientProxy extends CommonProxy {
 	public void registerRenderers(){
 		
 		RenderingRegistry.registerEntityRenderingHandler(Bullet.class, new RenderBullet(new ModelBullet()));
-		EntityRegistry.registerGlobalEntityID(Bullet.class, "Bullet", EntityRegistry.findGlobalUniqueEntityId());
 		
 	}
 	
