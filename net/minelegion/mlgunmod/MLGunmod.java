@@ -73,7 +73,7 @@ public class MLGunmod {
 	
 	private void addEntities(){
 		
-		
+		EntityRegistry.registerModEntity(Bullet.class, "Bullet", 1, MLGunmod.instance, 128, 1, false);
 		LanguageRegistry.instance().addStringLocalization("entity.Bullet.name", "Bullet");
 		
 	}
