@@ -28,7 +28,7 @@ public class Gun extends Item {
 			
 			Bullet bullet = new Bullet(world, player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch, 5, 5);
 			
-			if(world.isRemote)
+			//if(world.isRemote)
 				world.spawnEntityInWorld(bullet);
 			
 			lastShot = System.currentTimeMillis();
