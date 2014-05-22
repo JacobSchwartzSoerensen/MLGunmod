@@ -1,5 +1,7 @@
 package net.minelegion.mlgunmod;
 
+import java.util.List;
+
 import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.registry.EntityRegistry;
@@ -8,8 +10,11 @@ import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -22,6 +27,7 @@ public class Bullet extends Entity {
 	private int numTicks = 0;
 	private long maxAge = 1200;
 	private boolean hasHit = false;
+	private double hitRange = 0.1;
 	
 	public Bullet(World world) {
 		super(world);
@@ -44,14 +50,12 @@ public class Bullet extends Entity {
 		
 		this.renderDistanceWeight = 10.0D;
 		
-		System.out.println("Yaw: "+(this.rotationYaw%360));
-		System.out.println("Pitch: "+(this.rotationPitch%360));
-		
 	}
 	
 	@Override
 	public void onEntityUpdate(){
 		
+		//Despawns the bullet after a set time
 		if(maxAge < numTicks++){
 			
 			this.setDead();
@@ -59,9 +63,8 @@ public class Bullet extends Entity {
 			
 		}
 		
+		//Moving the bullet, if it has not hit anything
 		if(!hasHit){
-			
-			
 			
 			double motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			double motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
@@ -73,12 +76,37 @@ public class Bullet extends Entity {
 			
 		}
 		
+		//Checking if the bullet hit the ground, and despawn if it did
+		if(!worldObj.isRemote && worldObj.isBlockNormalCube((int) (this.posX+motionX),(int) (this.posY+motionY),(int) (this.posZ+motionZ)) && !hasHit){
+			
+			System.out.println("Hit");
+			hasHit = true;
+			this.setDead();
+			
+		}	
+		
+		if(!this.worldObj.isRemote && !hasHit){
+			
+			List<Entity> entities = worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(posX+hitRange, posY+hitRange, posZ+hitRange, posX-hitRange, posY-hitRange, posZ-hitRange));
+			
+			for(int i = 0; i < entities.size(); i++){
+				
+				if(entities.get(i) instanceof EntityLivingBase){
+					
+					EntityLivingBase entity = (EntityLivingBase) entities.get(i);
+					entity.attackEntityFrom(DamageSource.generic, damage);
+					
+				}
+				
+			}
+			
+		}
+		
 	}
 
 	@Override
 	protected void entityInit() {
-		
-		
+		//Nothing to do here
 		
 	}
 

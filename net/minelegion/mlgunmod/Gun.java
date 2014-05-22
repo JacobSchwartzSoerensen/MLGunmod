@@ -26,7 +26,7 @@ public class Gun extends Item {
 		
 		if((System.currentTimeMillis()-lastShot) > shootDelay && !world.isRemote){
 			
-			Bullet bullet = new Bullet(world, player.posX, player.posY+player.eyeHeight, player.posZ, player.rotationYaw, player.rotationPitch, 0.1f, 5);
+			Bullet bullet = new Bullet(world, player.posX, player.posY+player.eyeHeight, player.posZ, player.rotationYaw, player.rotationPitch, 2f, 5);
 			
 			world.spawnEntityInWorld(bullet);
 			
