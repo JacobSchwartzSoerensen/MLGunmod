@@ -1,4 +1,4 @@
-package net.minelegion.gunmod;
+package net.minelegion.mlgunmod;
 
 public class CommonProxy {
 

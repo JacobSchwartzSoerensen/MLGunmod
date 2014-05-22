@@ -1,8 +1,8 @@
-package net.minelegion.gunmod;
+package net.minelegion.mlgunmod;
 
 
 import net.minecraft.item.Item;
-import net.minelegion.gunmod.CommonProxy;
+import net.minelegion.mlgunmod.CommonProxy;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -15,26 +15,26 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
  
-@Mod(modid=Gunmod.MOD_ID, name=Gunmod.MOD_NAME, version=Gunmod.MOD_VERSION)
+@Mod(modid=MLGunmod.MOD_ID, name=MLGunmod.MOD_NAME, version=MLGunmod.MOD_VERSION)
 @NetworkMod(clientSideRequired=true, serverSideRequired=false)
-public class Gunmod {
+public class MLGunmod {
 
-	public static final String MOD_ID = "MLGunmod";
+	public static final String MOD_ID = "mlgunmod";
 	public static final String MOD_NAME = "ML Gunmod";
 	public static final String MOD_VERSION = "0.0.1";
-	public static final String CLIENT_PROXY = "net.minelegion.gunmod.client.ClientProxy";
-	public static final String COMMON_PROXY = "net.minelegion.gunmod.CommonProxy";
+	public static final String CLIENT_PROXY = "net.minelegion.mlgunmod.client.ClientProxy";
+	public static final String COMMON_PROXY = "net.minelegion.mlgunmod.CommonProxy";
 	
 	//Items
 	public Item gun = new Gun(1000, 200);
 	
 	
 	// The instance of your mod that Forge uses.
-	@Instance(Gunmod.MOD_ID)
-	public static Gunmod instance;
+	@Instance(MLGunmod.MOD_ID)
+	public static MLGunmod instance;
 
 	// Says where the client and server 'proxy' code is loaded.
-	@SidedProxy(clientSide=Gunmod.CLIENT_PROXY, serverSide=Gunmod.COMMON_PROXY)
+	@SidedProxy(clientSide=MLGunmod.CLIENT_PROXY, serverSide=MLGunmod.COMMON_PROXY)
 	public static CommonProxy proxy;
 	
 	@EventHandler
@@ -73,7 +73,7 @@ public class Gunmod {
 	
 	private void addEntities(){
 		
-		EntityRegistry.registerGlobalEntityID(Bullet.class, "Bullet", EntityRegistry.findGlobalUniqueEntityId());
+		
 		LanguageRegistry.instance().addStringLocalization("entity.Bullet.name", "Bullet");
 		
 	}
