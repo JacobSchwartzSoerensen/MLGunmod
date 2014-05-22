@@ -21,6 +21,7 @@ public class Bullet extends Entity {
 	private float damage = 0;
 	private int numTicks = 0;
 	private long maxAge = 1200;
+	private boolean hasHit = false;
 	
 	public Bullet(World world) {
 		super(world);
@@ -41,18 +42,36 @@ public class Bullet extends Entity {
 		this.speed = speed;
 		this.damage = damage;
 		
-		this.renderDistanceWeight = 10.0D;;
+		this.renderDistanceWeight = 10.0D;
+		
+		System.out.println("Yaw: "+(this.rotationYaw%360));
+		System.out.println("Pitch: "+(this.rotationPitch%360));
 		
 	}
 	
 	@Override
 	public void onEntityUpdate(){
 		
-		if(maxAge < numTicks++)
+		if(maxAge < numTicks++){
+			
 			this.setDead();
+			return;
+			
+		}
 		
-		super.onEntityUpdate();
-		
+		if(!hasHit){
+			
+			
+			
+			double motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
+			double motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
+			double motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
+			
+			this.posX += motionX;
+			this.posY += motionY;
+			this.posZ += motionZ;
+			
+		}
 		
 	}
 
