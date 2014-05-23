@@ -90,46 +90,50 @@ public class Bullet extends Entity {
 			
 			//For collision handling with world blocks, not implemented yet
 			/*Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-	        Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
-	        MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);*/
-	        
-			//Creates vectors for current position and position in next tick
-	        Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-	        Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
-	        
-	        //Same as above commented out code
-	        /*if (movingobjectposition != null)
-	        {
-	            vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
-	        }*/
+			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
+			MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);*/
 			
+			//Creates vectors for current position and position in next tick
+			Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			
+			//Same as above commented out code
+			/*if (movingobjectposition != null)
+			{
+		    	vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+			}*/
+			
+			//Expanding the bounding box of the bullet to cover both current and next position, and gets all entities within
 			List<?> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
-			double d = 0.0D;
-	        for (int k = 0; k < list.size(); k++)
-	        {
-	            Entity entity2 = (Entity) list.get(k);
-	            
-	            float f3 = this.hitRange;
-	            AxisAlignedBB axisalignedbb = entity2.boundingBox.expand(f3, f3, f3);
-	            MovingObjectPosition movingobjectposition1 = axisalignedbb.calculateIntercept(vecPos, vecNextPos);
-	            
-	            if (movingobjectposition1 == null)
-	            {
-	            	continue;
-	            }
-	            double d1 = vecPos.distanceTo(movingobjectposition1.hitVec);
-	            if (d1 < d || d == 0.0D)
-	            {
-	            	
-	            	if(entity2 instanceof EntityLivingBase && !entity2.equals(shooter)){
-	            		
-	            		entity2.attackEntityFrom(DamageSource.generic, damage);
-	            		setDead();
-	            		return;
-	            	}
-	            	
-	            }
-	        }
+			
+			//Loops through all entities found above. This is necessary as we need to do path tracking on the bullets movement, for precise hit detection
+			for (int k = 0; k < list.size(); k++){
+				
+				Entity entity2 = (Entity) list.get(k);
+				
+				//Expands the bounding box of the hit entity, to make up for the bounding box of the bullet, which is not included with the path vectors (vecPos and vecNextPos)
+				AxisAlignedBB axisalignedbb = entity2.boundingBox.expand(hitRange, hitRange, hitRange);
+				//Creating a position object where the bullets movement path intersects with the bounding box of the entity
+				MovingObjectPosition movingobjectposition1 = axisalignedbb.calculateIntercept(vecPos, vecNextPos);
+				
+				//If the movement path does not intersect with the bounding box of the entity, the position object will be null, and we should in this case not handle a hit
+				if (movingobjectposition1 == null){
+					
+					continue;
+					
+				}
+				
+				//If the hit entity is a living entity, and is not the shooter, handle a hit
+				if(entity2 instanceof EntityLivingBase && !entity2.equals(shooter)){
+					
+					//Providing damage to the hit entity, despawn the bullet, and end the update method to avoid further hits before the bullet despawns
+					entity2.attackEntityFrom(DamageSource.generic, damage);
+					setDead();
+					return;
+					
+				}
+				
+			}
 			
 			//Applies movement to the position
 			this.posX += motionX;
@@ -138,7 +142,7 @@ public class Bullet extends Entity {
 			
 			//Updates the bounding box with new position
 			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
-			
+				
 		}
 		
 	}
