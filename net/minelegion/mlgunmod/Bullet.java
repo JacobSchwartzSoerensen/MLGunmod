@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IProjectile;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
@@ -30,17 +31,21 @@ public class Bullet extends Entity {
 	private long maxAge = 200;
 	private boolean hasHit = false;
 	private float hitRange = 0.3f;
+	private EntityPlayer shooter;
 	
 	public Bullet(World world) {
 		super(world);
 		
 	}
 	
-	public Bullet(World world, double x, double y, double z, float yaw, float pitch, float speed, float damage){
+	public Bullet(World world, double x, double y, double z, float yaw, float pitch, float speed, float damage, EntityPlayer player){
 		super(world);
 		
 		this.setSize(1f, 1f);
 		this.setPosition(x, y, z);
+		
+		//Updates the bounding box with new position
+		this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
 		
 		this.rotationYaw = yaw;
 		this.rotationPitch = -pitch;
@@ -52,18 +57,12 @@ public class Bullet extends Entity {
 		
 		this.renderDistanceWeight = 10.0D;
 		
+		this.shooter = player;
+		
 	}
 	
 	@Override
 	public void onEntityUpdate(){
-		
-		
-		//Moving the bullet, if it has not hit anything
-		if(!hasHit){
-			
-			
-			
-		}
 		
 		//Checking if the bullet hit the ground, and despawn if it did
 		/*if(!worldObj.isRemote && worldObj.isBlockNormalCube((int) (this.posX+motionX),(int) (this.posY+motionY),(int) (this.posZ+motionZ)) && !hasHit){
@@ -88,14 +87,6 @@ public class Bullet extends Entity {
 			this.motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			this.motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
 			this.motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
-			
-			//Applies movement to the position
-			this.posX += motionX;
-			this.posY += motionY;
-			this.posZ += motionZ;
-			
-			//Updates the bounding box with new position
-			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
 			
 			//For collision handling with world blocks, not implemented yet
 			/*Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
@@ -130,7 +121,8 @@ public class Bullet extends Entity {
 	            if (d1 < d || d == 0.0D)
 	            {
 	            	
-	            	if(entity2 instanceof EntityLivingBase /*Add check if it hit the shooting player here as well*/){
+	            	if(entity2 instanceof EntityLivingBase && !entity2.equals(shooter)){
+	            		
 	            		entity2.attackEntityFrom(DamageSource.generic, damage);
 	            		setDead();
 	            		return;
@@ -138,6 +130,14 @@ public class Bullet extends Entity {
 	            	
 	            }
 	        }
+			
+			//Applies movement to the position
+			this.posX += motionX;
+			this.posY += motionY;
+			this.posZ += motionZ;
+			
+			//Updates the bounding box with new position
+			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
 			
 		}
 		
