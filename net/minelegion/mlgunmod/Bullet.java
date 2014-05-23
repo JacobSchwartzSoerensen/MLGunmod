@@ -15,7 +15,9 @@ import net.minecraft.entity.IProjectile;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.World;
 
 public class Bullet extends Entity {
@@ -25,9 +27,9 @@ public class Bullet extends Entity {
 	private float speed = 0;
 	private float damage = 0;
 	private int numTicks = 0;
-	private long maxAge = 1200;
+	private long maxAge = 200;
 	private boolean hasHit = false;
-	private double hitRange = 0.1;
+	private float hitRange = 0.3f;
 	
 	public Bullet(World world) {
 		super(world);
@@ -55,50 +57,95 @@ public class Bullet extends Entity {
 	@Override
 	public void onEntityUpdate(){
 		
-		//Despawns the bullet after a set time
-		if(maxAge < numTicks++){
-			
-			this.setDead();
-			return;
-			
-		}
 		
 		//Moving the bullet, if it has not hit anything
 		if(!hasHit){
 			
-			double motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
-			double motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
-			double motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			
-			this.posX += motionX;
-			this.posY += motionY;
-			this.posZ += motionZ;
 			
 		}
 		
 		//Checking if the bullet hit the ground, and despawn if it did
-		if(!worldObj.isRemote && worldObj.isBlockNormalCube((int) (this.posX+motionX),(int) (this.posY+motionY),(int) (this.posZ+motionZ)) && !hasHit){
+		/*if(!worldObj.isRemote && worldObj.isBlockNormalCube((int) (this.posX+motionX),(int) (this.posY+motionY),(int) (this.posZ+motionZ)) && !hasHit){
 			
 			System.out.println("Hit");
 			hasHit = true;
 			this.setDead();
 			
-		}	
+		}*/
 		
-		if(!this.worldObj.isRemote && !hasHit){
+		if(!this.worldObj.isRemote){
 			
-			List<Entity> entities = worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(posX+hitRange, posY+hitRange, posZ+hitRange, posX-hitRange, posY-hitRange, posZ-hitRange));
+			/*List<Entity> entities = worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(posX+hitRange, posY+hitRange, posZ+hitRange, posX-hitRange, posY-hitRange, posZ-hitRange));
 			
 			for(int i = 0; i < entities.size(); i++){
 				
 				if(entities.get(i) instanceof EntityLivingBase){
-					
+					System.out.println("Hit creature");
 					EntityLivingBase entity = (EntityLivingBase) entities.get(i);
 					entity.attackEntityFrom(DamageSource.generic, damage);
 					
 				}
 				
+			}*/
+			
+			
+			
+			//Despawns the bullet after a set time
+			if(maxAge < numTicks++){
+				
+				this.setDead();
+				return;
+				
 			}
+			
+			this.motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
+			this.motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
+			this.motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
+			
+			this.posX += motionX;
+			this.posY += motionY;
+			this.posZ += motionZ;
+			
+			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
+			
+			Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+	        Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
+	        MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);
+	        
+	        vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+	        vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+	        /*if (movingobjectposition != null)
+	        {
+	            vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+	        }*/
+			
+			List<?> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
+			System.out.println(boundingBox);
+			double d = 0.0D;
+	        for (int k = 0; k < list.size(); k++)
+	        {
+	            Entity entity2 = (Entity) list.get(k);
+	            
+	            //System.out.println("Step 1");
+	            
+	            float f3 = this.hitRange;
+	            AxisAlignedBB axisalignedbb = entity2.boundingBox.expand(f3, f3, f3);
+	            MovingObjectPosition movingobjectposition1 = axisalignedbb.calculateIntercept(vecPos, vecNextPos);
+	            //System.out.println(entity2+":"+movingobjectposition1);
+	            if (movingobjectposition1 == null)
+	            {
+	                //System.out.println("Abort");
+	            	continue;
+	            }
+	            double d1 = vecPos.distanceTo(movingobjectposition1.hitVec);
+	            if (d1 < d || d == 0.0D)
+	            {
+	                System.out.println("oh no :(");
+	            	entity2.attackEntityFrom(DamageSource.generic, damage);
+	            	
+	            }
+	        }
 			
 		}
 		
@@ -147,7 +194,7 @@ public class Bullet extends Entity {
 			GL11.glRotatef(bullet.rotationPitch + (bullet.rotationPitch - bullet.prevRotationPitch) * pitch, 1.0F, 0.0F, 0.0F);
 
 			this.bindTexture(bulletTexture);
-
+			
 			model.render(bullet, 0.0F, 0.0F, -0.1F, 0.0F, 0.0F, 0.02F);
 			        
 			//Resets rotation and translation
