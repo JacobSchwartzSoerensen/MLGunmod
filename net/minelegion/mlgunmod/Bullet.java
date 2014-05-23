@@ -76,21 +76,6 @@ public class Bullet extends Entity {
 		
 		if(!this.worldObj.isRemote){
 			
-			/*List<Entity> entities = worldObj.getEntitiesWithinAABBExcludingEntity(this, AxisAlignedBB.getBoundingBox(posX+hitRange, posY+hitRange, posZ+hitRange, posX-hitRange, posY-hitRange, posZ-hitRange));
-			
-			for(int i = 0; i < entities.size(); i++){
-				
-				if(entities.get(i) instanceof EntityLivingBase){
-					System.out.println("Hit creature");
-					EntityLivingBase entity = (EntityLivingBase) entities.get(i);
-					entity.attackEntityFrom(DamageSource.generic, damage);
-					
-				}
-				
-			}*/
-			
-			
-			
 			//Despawns the bullet after a set time
 			if(maxAge < numTicks++){
 				
@@ -99,50 +84,56 @@ public class Bullet extends Entity {
 				
 			}
 			
+			//Calculates the movement of the bullet based of yaw and pitch
 			this.motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			this.motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
 			this.motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			
+			//Applies movement to the position
 			this.posX += motionX;
 			this.posY += motionY;
 			this.posZ += motionZ;
 			
+			//Updates the bounding box with new position
 			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
 			
-			Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+			//For collision handling with world blocks, not implemented yet
+			/*Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
 	        Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
-	        MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);
+	        MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);*/
 	        
-	        vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-	        vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			//Creates vectors for current position and position in next tick
+	        Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+	        Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+	        
+	        //Same as above commented out code
 	        /*if (movingobjectposition != null)
 	        {
 	            vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
 	        }*/
 			
 			List<?> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
-			System.out.println(boundingBox);
 			double d = 0.0D;
 	        for (int k = 0; k < list.size(); k++)
 	        {
 	            Entity entity2 = (Entity) list.get(k);
 	            
-	            //System.out.println("Step 1");
-	            
 	            float f3 = this.hitRange;
 	            AxisAlignedBB axisalignedbb = entity2.boundingBox.expand(f3, f3, f3);
 	            MovingObjectPosition movingobjectposition1 = axisalignedbb.calculateIntercept(vecPos, vecNextPos);
-	            //System.out.println(entity2+":"+movingobjectposition1);
+	            
 	            if (movingobjectposition1 == null)
 	            {
-	                //System.out.println("Abort");
 	            	continue;
 	            }
 	            double d1 = vecPos.distanceTo(movingobjectposition1.hitVec);
 	            if (d1 < d || d == 0.0D)
 	            {
-	                System.out.println("oh no :(");
-	            	entity2.attackEntityFrom(DamageSource.generic, damage);
+	            	
+	            	if(entity2 instanceof EntityLivingBase /*Add check if it hit the shooting player here as well*/){
+	            		entity2.attackEntityFrom(DamageSource.generic, damage);
+	            		setDead();
+	            	}
 	            	
 	            }
 	        }
@@ -192,6 +183,7 @@ public class Bullet extends Entity {
 			GL11.glTranslatef((float) x, (float) y, (float) z);
 			GL11.glRotatef(-yaw + 180 , 0.0F, 1.0F, 0.0F);
 			GL11.glRotatef(bullet.rotationPitch + (bullet.rotationPitch - bullet.prevRotationPitch) * pitch, 1.0F, 0.0F, 0.0F);
+			GL11.glScalef(0.1f, 0.1f, 0.1f);
 
 			this.bindTexture(bulletTexture);
 			
