@@ -133,6 +133,7 @@ public class Bullet extends Entity {
 	            	if(entity2 instanceof EntityLivingBase /*Add check if it hit the shooting player here as well*/){
 	            		entity2.attackEntityFrom(DamageSource.generic, damage);
 	            		setDead();
+	            		return;
 	            	}
 	            	
 	            }
