@@ -93,7 +93,7 @@ public class Bullet extends Entity {
 			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
 			MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);*/
 			
-			//Creates vectors for current position and position in next tick
+			//Creates vectors for current position and next position
 			Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
 			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
 			
