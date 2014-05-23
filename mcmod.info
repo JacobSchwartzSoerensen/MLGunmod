@@ -7,8 +7,8 @@
   "mcversion": "1.6.4",
   "url": "",
   "updateUrl": "",
-  "authors": ["ExampleDude"],
-  "credits": "Jacob Schwartz S�rensen, Nicolai Ravn",
+  "authors": ["Jacob Schwartz Sørensen", "Nicolai Ravn"],
+  "credits": "Jacob Schwartz Sørensen, Nicolai Ravn",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
