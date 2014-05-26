@@ -23,10 +23,9 @@ import net.minecraft.world.World;
 
 public class Bullet extends Entity {
 
-	private float pitch = 0;
-	private float yaw = 0;
 	private float speed = 0;
 	private float damage = 0;
+	private float drop = 0;
 	private int numTicks = 0;
 	private long maxAge = 200;
 	private boolean hasHit = false;
@@ -38,7 +37,7 @@ public class Bullet extends Entity {
 		
 	}
 	
-	public Bullet(World world, double x, double y, double z, float yaw, float pitch, float speed, float damage, EntityPlayer player){
+	public Bullet(World world, double x, double y, double z, float yaw, float pitch, float speed, float damage, float drop, EntityPlayer player){
 		super(world);
 		
 		this.setSize(1f, 1f);
@@ -50,10 +49,9 @@ public class Bullet extends Entity {
 		this.rotationYaw = yaw;
 		this.rotationPitch = -pitch;
 		
-		this.yaw = yaw;
-		this.pitch = pitch;
 		this.speed = speed;
 		this.damage = damage;
+		this.drop = drop;
 		
 		this.renderDistanceWeight = 10.0D;
 		
@@ -64,15 +62,6 @@ public class Bullet extends Entity {
 	@Override
 	public void onEntityUpdate(){
 		
-		//Checking if the bullet hit the ground, and despawn if it did
-		/*if(!worldObj.isRemote && worldObj.isBlockNormalCube((int) (this.posX+motionX),(int) (this.posY+motionY),(int) (this.posZ+motionZ)) && !hasHit){
-			
-			System.out.println("Hit");
-			hasHit = true;
-			this.setDead();
-			
-		}*/
-		
 		if(!this.worldObj.isRemote){
 			
 			//Despawns the bullet after a set time
@@ -82,6 +71,15 @@ public class Bullet extends Entity {
 				return;
 				
 			}
+			
+			//Applies bullet drop if the bullet is not heading straight down
+			if(this.rotationPitch > -90f){
+				this.rotationPitch -= drop;
+			}else{
+				this.rotationPitch = -90f;
+			}
+			
+			System.out.println(this.rotationPitch);
 			
 			//Calculates the movement of the bullet based of yaw and pitch
 			this.motionX = Math.sin(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
