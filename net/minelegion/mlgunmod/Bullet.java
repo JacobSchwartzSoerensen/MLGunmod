@@ -88,20 +88,24 @@ public class Bullet extends Entity {
 			this.motionY = Math.sin(Math.toRadians(this.rotationPitch%360))*speed;
 			this.motionZ = Math.cos(Math.toRadians(-(this.rotationYaw%360)))*speed*Math.cos(Math.toRadians(this.rotationPitch%360));
 			
-			//For collision handling with world blocks, not implemented yet
-			/*Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
-			MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);*/
-			
-			//Creates vectors for current position and next position
+			//Ray tracing bullet movement for world blocks
 			Vec3 vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
-			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			Vec3 vecNextPos = Vec3.createVectorHelper(this.posX + motionX, posY + motionY, this.posZ + motionZ);
+			MovingObjectPosition movingobjectposition = this.worldObj.clip(vecPos, vecNextPos);
 			
-			//Same as above commented out code
-			/*if (movingobjectposition != null)
+			//Re-Creates vectors for current position and next position, as raytracing messes it up
+			vecPos = Vec3.createVectorHelper(this.posX, this.posY, this.posZ);
+			vecNextPos = Vec3.createVectorHelper(this.posX + this.motionX, this.posY + this.motionY, this.posZ + this.motionZ);
+			
+			//If there is a block collision, check if the block is solid
+			if (movingobjectposition != null && worldObj.isBlockNormalCube(movingobjectposition.blockX, movingobjectposition.blockY, movingobjectposition.blockZ))
 			{
-		    	vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
-			}*/
+				//Set the next position to the collision point on the block. This will avoid damage from the bullet ghosting through the block
+				vecNextPos = Vec3.createVectorHelper(movingobjectposition.hitVec.xCoord, movingobjectposition.hitVec.yCoord, movingobjectposition.hitVec.zCoord);
+		    	
+				//Mark the bullet for later removal
+				hasHit = true;
+			}
 			
 			//Expanding the bounding box of the bullet to cover both current and next position, and gets all entities within
 			List<?> list = this.worldObj.getEntitiesWithinAABBExcludingEntity(this, this.boundingBox.addCoord(this.motionX, this.motionY, this.motionZ).expand(1.0D, 1.0D, 1.0D));
@@ -136,12 +140,20 @@ public class Bullet extends Entity {
 			}
 			
 			//Applies movement to the position
-			this.posX += motionX;
-			this.posY += motionY;
-			this.posZ += motionZ;
+			this.posX = vecNextPos.xCoord;
+			this.posY = vecNextPos.yCoord;
+			this.posZ = vecNextPos.zCoord;
 			
 			//Updates the bounding box with new position
 			this.boundingBox.setBounds(posX-hitRange, posY-hitRange, posZ-hitRange, posX+hitRange, posY+hitRange, posZ+hitRange);
+			
+			//If the bullet has hit something previously in the code, it should now be removed
+			if(hasHit){
+				
+				setDead();
+		    	return;
+				
+			}
 				
 		}
 		
